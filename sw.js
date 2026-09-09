@@ -5,7 +5,7 @@
  * Pyodide (~12 MB)        : cached the first time Python runs, so the learner
  *                           opts in simply by using it once while online
  */
-const VERSION = 'pyquest-v7';
+const VERSION = 'pyquest-v8';
 const SHELL = VERSION + '-shell';
 const RUNTIME = VERSION + '-runtime';
 

@@ -1,6 +1,6 @@
 {
-  "name": "PyQuest — Python Mastery",
-  "short_name": "PyQuest",
+  "name": "PyQuest Gean",
+  "short_name": "PyQuest Gean",
   "description": "A gamified journey from absolute beginner to professional Python. Real CPython in your browser, works offline.",
   "start_url": "./index.html",
   "scope": "./",

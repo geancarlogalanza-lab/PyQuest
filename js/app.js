@@ -40,7 +40,7 @@
     install.deferred = null;
     install.installed = true;
     install.emit();
-    if (PQ.ui) PQ.ui.toast('PyQuest installed', 'ok');
+    if (PQ.ui) PQ.ui.toast('PyQuest Gean installed', 'ok');
   });
 
   async function main() {

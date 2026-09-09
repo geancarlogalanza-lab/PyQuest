@@ -64,4 +64,27 @@ function isGreen(x, y) {
   return inside;
 }
 
-module.exports = { GRID, GREEN, BLACK, POLYGONS, svgPaths, toPath, isGreen };
+/** Tight bounding box of the mark: [x, y, w, h]. Every edge is straight, so
+    the vertices alone give an exact answer. */
+function bbox() {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const poly of POLYGONS) {
+    for (const [x, y] of poly) {
+      if (x < x0) x0 = x;
+      if (y < y0) y0 = y;
+      if (x > x1) x1 = x;
+      if (y > y1) y1 = y;
+    }
+  }
+  return [x0, y0, x1 - x0, y1 - y0];
+}
+
+/** A square box around the mark, padded by a fraction of its longest side.
+    This is what the favicon uses: no plate, just the mark filling the frame. */
+function squareBox(pad) {
+  const [x, y, w, h] = bbox();
+  const side = Math.max(w, h) * (1 + (pad || 0));
+  return [x + w / 2 - side / 2, y + h / 2 - side / 2, side];
+}
+
+module.exports = { GRID, GREEN, BLACK, POLYGONS, svgPaths, toPath, isGreen, bbox, squareBox };

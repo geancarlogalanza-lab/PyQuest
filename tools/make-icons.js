@@ -66,6 +66,34 @@ function render(size, maskable) {
   return px;
 }
 
+/* A tab icon is a different problem from an app icon. At 16px the rounded black
+   plate eats a third of the width and the mark inside it turns to mush, so the
+   favicon drops the plate and fills the frame with the mark. The cut-outs then
+   go transparent, which means they pick up the tab strip and stay legible on a
+   light theme and a dark one alike. */
+function renderGlyph(size) {
+  const SS = 4;
+  const [bx, by, bs] = logo.squareBox(0.06);
+  const px = Buffer.alloc(size * size * 4);
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      let hits = 0;
+      for (let sy = 0; sy < SS; sy++) {
+        for (let sx = 0; sx < SS; sx++) {
+          const gx = bx + ((x + (sx + 0.5) / SS) / size) * bs;
+          const gy = by + ((y + (sy + 0.5) / SS) / size) * bs;
+          if (logo.isGreen(gx, gy)) hits++;
+        }
+      }
+      const i = (y * size + x) * 4;
+      for (let c = 0; c < 3; c++) px[i + c] = FG[c];
+      px[i + 3] = Math.round((hits / (SS * SS)) * 255);
+    }
+  }
+  return px;
+}
+
 /* The link-preview card: not square, no rounded corners, and the mark simply
    centred on black. The words come from the og:title beside it, so the image
    stays the mark and nothing else. */
@@ -140,6 +168,30 @@ function png(w, h, pixels) {
   ]);
 }
 
+/* ---------- ICO ---------- */
+/* An .ico is a directory of images; PNG payloads are valid and every browser
+   still in use reads them. Bundling 16/32/48 means the browser picks rather
+   than downscaling one bitmap badly. */
+function ico(parts) {
+  const dir = Buffer.alloc(6 + 16 * parts.length);
+  dir.writeUInt16LE(0, 0);
+  dir.writeUInt16LE(1, 2);              // type 1 = icon
+  dir.writeUInt16LE(parts.length, 4);
+
+  let offset = dir.length;
+  parts.forEach((part, i) => {
+    const o = 6 + i * 16;
+    dir[o] = part.size >= 256 ? 0 : part.size;   // 0 means 256
+    dir[o + 1] = part.size >= 256 ? 0 : part.size;
+    dir.writeUInt16LE(1, o + 4);        // colour planes
+    dir.writeUInt16LE(32, o + 6);       // bits per pixel
+    dir.writeUInt32LE(part.data.length, o + 8);
+    dir.writeUInt32LE(offset, o + 12);
+    offset += part.data.length;
+  });
+  return Buffer.concat([dir, ...parts.map(p => p.data)]);
+}
+
 /* ---------- svg ---------- */
 function svg(maskable) {
   const G = logo.GRID;
@@ -151,6 +203,17 @@ function svg(maskable) {
     ? `<rect width="${G}" height="${G}" fill="#000"/>`
     : `<rect width="${G}" height="${G}" rx="${G * 0.222}" fill="#000"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${G} ${G}">\n  ${bg}\n  ${shape}\n</svg>\n`;
+}
+
+/* The same mark, framed for a tab rather than a home screen. */
+function faviconSvg() {
+  const [x, y, s] = logo.squareBox(0.06);
+  const r = n => Math.round(n * 100) / 100;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r(x)} ${r(y)} ${r(s)} ${r(s)}">
+` +
+    `  <path fill="${logo.GREEN}" fill-rule="evenodd" d="${logo.svgPaths()}"/>
+</svg>
+`;
 }
 
 /* ---------- build ---------- */
@@ -167,6 +230,22 @@ for (const [name, size, maskable] of PNGS) {
   fs.writeFileSync(file, png(size, size, render(size, maskable)));
   console.log(`  ${name.padEnd(24)} ${size}x${size}  ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
 }
+/* tab icons: mark only, no plate */
+const GLYPHS = [16, 32, 48];
+const glyphPngs = GLYPHS.map(size => ({ size, data: png(size, size, renderGlyph(size)) }));
+glyphPngs.forEach(({ size, data }) => {
+  const file = path.join(OUT, `icon-${size}.png`);
+  fs.writeFileSync(file, data);
+  console.log(`  ${(`icon-${size}.png`).padEnd(24)} ${size}x${size}  ${(data.length / 1024).toFixed(1)} KB`);
+});
+
+const icoFile = path.join(__dirname, '..', 'favicon.ico');
+fs.writeFileSync(icoFile, ico(glyphPngs));
+console.log(`  ${'favicon.ico'.padEnd(24)} 16/32/48  ${(fs.statSync(icoFile).size / 1024).toFixed(1)} KB`);
+
+fs.writeFileSync(path.join(OUT, 'favicon.svg'), faviconSvg());
+console.log('  favicon.svg');
+
 const CARD = [1200, 630];
 const cardFile = path.join(OUT, 'social.png');
 fs.writeFileSync(cardFile, png(CARD[0], CARD[1], renderCard(CARD[0], CARD[1])));

@@ -5,7 +5,7 @@
  * Pyodide (~12 MB)        : cached the first time Python runs, so the learner
  *                           opts in simply by using it once while online
  */
-const VERSION = 'pyquest-v6';
+const VERSION = 'pyquest-v7';
 const SHELL = VERSION + '-shell';
 const RUNTIME = VERSION + '-runtime';
 
@@ -19,6 +19,11 @@ const CORE = [
   'js/views/home.js', 'js/views/path.js', 'js/views/lesson.js', 'js/views/practice.js',
   'js/views/skills.js', 'js/views/profile.js', 'js/views/settings.js', 'js/views/playground.js',
   'content/manifest.js',
+  'favicon.ico',
+  'icons/favicon.svg',
+  'icons/icon-16.png',
+  'icons/icon-32.png',
+  'icons/icon-48.png',
   'icons/icon.svg',
   'icons/icon-maskable.svg',
   'icons/icon-192.png',

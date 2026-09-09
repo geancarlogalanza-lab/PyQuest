@@ -89,6 +89,40 @@
     return el;
   }
 
+  /* ---------- brand mark ----------
+     The viper head, same geometry as the app icon (tools/logo.js). Kept here
+     so the sidebar, the boot screen and the installed icon are one shape. */
+  const LOGO_PATH = 'M275 190L540 224L805 190L882 352L850 376L700 800L622 828L540 858L458 828L380 800L230 376L198 352ZM246 238L450 332L256 340ZM834 238L630 332L824 340ZM470 366L450 408L492 408ZM610 366L588 408L630 408ZM436 450L540 420L644 450L576 782L540 808L504 782ZM320 420L360 452L486 790L446 770ZM760 420L720 452L594 790L634 770Z';
+  const LOGO_GREEN = '#3EAD4A';
+
+  function logo(size) {
+    const el = document.createElementNS(NS, 'svg');
+    el.setAttribute('viewBox', '0 0 1080 1080');
+    el.setAttribute('width', size || 24);
+    el.setAttribute('height', size || 24);
+    el.setAttribute('aria-hidden', 'true');
+    el.setAttribute('focusable', 'false');
+    el.setAttribute('class', 'logo-mark');
+    el.innerHTML = '<path fill="' + LOGO_GREEN + '" fill-rule="evenodd" d="' + LOGO_PATH + '"/>';
+    return el;
+  }
+
+  // Any element with data-logo="<px>" gets the mark, so markup stays declarative.
+  function paintLogos(root) {
+    (root || document).querySelectorAll('[data-logo]').forEach(n => {
+      n.innerHTML = '';
+      n.appendChild(logo(parseInt(n.dataset.logo, 10) || 24));
+    });
+  }
+  // Paint now, for the shell markup that sits above this script: waiting for
+  // DOMContentLoaded would hold the boot mark behind the CodeMirror download.
+  // The listener below then catches anything declared after it.
+  paintLogos();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => paintLogos());
+
+  PQ.logo = logo;
+  PQ.paintLogos = paintLogos;
+  PQ.LOGO_PATH = LOGO_PATH;
   PQ.icon = icon;
   PQ.iconFilled = iconFilled;
   PQ.iconHTML = svgHTML;

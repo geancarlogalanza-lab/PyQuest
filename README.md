@@ -179,7 +179,8 @@ serve.js                   static server, prints the LAN address for your phone
 sw.js                      service worker: offline caching
 DESIGN.md                  why it is built this way
 sql/schema.sql             optional Supabase table + RLS policies
-tools/make-icons.js        regenerates the app icons (node tools/make-icons.js)
+tools/logo.js              the logo, as polygons — the one source for every icon size
+tools/make-icons.js        regenerates the icons and the in-app mark (node tools/make-icons.js)
 
 css/app.css                design system (dark + light, responsive)
 js/

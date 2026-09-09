@@ -122,7 +122,7 @@ code,kbd{font-family:var(--mono)}
    ============================================================ */
 .boot{position:fixed; inset:0; display:grid; place-content:center; justify-items:center;
   gap:var(--s2); background:var(--bg); z-index:100; text-align:center; padding:var(--s6)}
-.boot-logo{font-family:var(--mono); font-size:2rem; color:var(--gold); font-weight:700; letter-spacing:-.05em}
+.boot-logo{display:flex; min-height:44px}
 .boot-title{font-size:var(--t-lg); font-weight:650; letter-spacing:-.02em}
 .boot-sub{color:var(--fg-3); font-size:var(--t-sm)}
 .boot.fade{opacity:0; transition:opacity .25s; pointer-events:none}
@@ -140,8 +140,7 @@ code,kbd{font-family:var(--mono)}
 .rail-brand{display:flex; align-items:center; gap:var(--s2);
   padding:var(--s1) var(--s3) var(--s5); color:var(--fg)}
 .rail-brand:hover{text-decoration:none}
-.rail-mark{font-family:var(--mono); font-weight:700; color:var(--gold);
-  font-size:var(--t-md); letter-spacing:-.05em}
+.rail-mark{display:flex; flex:0 0 22px}
 .rail-name{font-weight:650; letter-spacing:-.02em; font-size:var(--t-md)}
 
 .rail-links{display:flex; flex-direction:column; gap:2px; flex:1; overflow:auto}

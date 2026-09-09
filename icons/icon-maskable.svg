@@ -1,5 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0d1117"/>
-  <text x="256" y="322" font-family="ui-monospace, Consolas, monospace" font-size="170" font-weight="700"
-        text-anchor="middle" fill="#ffd43b">&gt;_</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <rect width="1080" height="1080" fill="#000"/>
+  <g transform="translate(172.79999999999995 172.79999999999995) scale(0.68)"><path fill="#3EAD4A" fill-rule="evenodd" d="M275 190L540 224L805 190L882 352L850 376L700 800L622 828L540 858L458 828L380 800L230 376L198 352ZM246 238L450 332L256 340ZM834 238L630 332L824 340ZM470 366L450 408L492 408ZM610 366L588 408L630 408ZM436 450L540 420L644 450L576 782L540 808L504 782ZM320 420L360 452L486 790L446 770ZM760 420L720 452L594 790L634 770Z"/></g>
 </svg>

@@ -12,6 +12,7 @@
 <title>PyQuest — Python Mastery</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="css/app.css">
@@ -19,7 +20,7 @@
 <body>
 
 <div id="boot" class="boot">
-  <div class="boot-logo">&gt;_</div>
+  <div class="boot-logo" data-logo="44"></div>
   <div class="boot-title">PyQuest</div>
   <div class="boot-sub" id="boot-sub">Loading your journey…</div>
 </div>
@@ -29,7 +30,7 @@
   <!-- ===== Desktop rail ===== -->
   <nav class="rail" id="rail">
     <a class="rail-brand" href="#/home">
-      <span class="rail-mark">&gt;_</span>
+      <span class="rail-mark" data-logo="22"></span>
       <span class="rail-name">PyQuest</span>
     </a>
     <div class="rail-links" id="rail-links"></div>
@@ -51,6 +52,10 @@
 <div id="toasts" class="toasts"></div>
 <div id="modal-root"></div>
 
+<!-- local, tiny, and needed before first paint -->
+<script src="js/util.js"></script>
+<script src="js/icons.js"></script>
+
 <!-- CodeMirror 5 (UMD, works without a bundler) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
@@ -58,8 +63,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
 
-<script src="js/util.js"></script>
-<script src="js/icons.js"></script>
 <script src="js/store.js"></script>
 <script src="js/content.js"></script>
 <script src="js/engine.js"></script>

@@ -121,16 +121,22 @@
     });
   }
 
+  /* Content files are fetched in PARALLEL. injectScript sets async = false, so
+     the browser still executes them in insertion order — this is one round trip
+     instead of thirty. Order does not actually matter either way: defineModule
+     only appends, and index() sorts by tier and order afterwards. */
   async function loadAll(onProgress) {
     await injectScript('content/manifest.js');
     const files = PQ.CONTENT_FILES || [];
-    for (let i = 0; i < files.length; i++) {
-      try { await injectScript('content/' + files[i]); }
-      catch (e) { console.warn('[content] skipped ' + files[i], e); }
-      if (onProgress) onProgress(i + 1, files.length);
-    }
+    let done = 0;
+    await Promise.all(files.map(name =>
+      injectScript('content/' + name)
+        .catch(e => { console.warn('[content] skipped ' + name, e); })
+        .then(() => { done += 1; if (onProgress) onProgress(done, files.length); })
+    ));
     index();
   }
+
 
   PQ.defineModule = defineModule;
   PQ.content = {

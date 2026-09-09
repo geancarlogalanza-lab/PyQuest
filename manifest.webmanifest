@@ -1,0 +1,21 @@
+{
+  "name": "PyQuest — Python Mastery",
+  "short_name": "PyQuest",
+  "description": "A gamified journey from absolute beginner to professional Python. Works offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Continue learning", "url": "./index.html#/home" },
+    { "name": "Review", "url": "./index.html#/practice" },
+    { "name": "Playground", "url": "./index.html#/playground" }
+  ]
+}

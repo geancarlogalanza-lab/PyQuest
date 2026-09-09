@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#0d1117">
+<meta name="description" content="PyQuest — a gamified journey from absolute beginner to professional Python.">
+<title>PyQuest — Python Mastery</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div id="boot" class="boot">
+  <div class="boot-logo">&gt;_</div>
+  <div class="boot-title">PyQuest</div>
+  <div class="boot-sub" id="boot-sub">Loading your journey…</div>
+</div>
+
+<div id="app" class="app" hidden>
+
+  <!-- ===== Desktop rail ===== -->
+  <nav class="rail" id="rail">
+    <a class="rail-brand" href="#/home">
+      <span class="rail-mark">&gt;_</span>
+      <span class="rail-name">PyQuest</span>
+    </a>
+    <div class="rail-links" id="rail-links"></div>
+    <div class="rail-foot">
+      <div class="rail-lvl" id="rail-lvl"></div>
+    </div>
+  </nav>
+
+  <!-- ===== Main ===== -->
+  <main class="main" id="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="view" id="view"></div>
+  </main>
+
+  <!-- ===== Mobile tab bar ===== -->
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+
+<div id="toasts" class="toasts"></div>
+<div id="modal-root"></div>
+
+<!-- CodeMirror 5 (UMD, works without a bundler) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+
+<script src="js/util.js"></script>
+<script src="js/store.js"></script>
+<script src="js/content.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/errors.js"></script>
+<script src="js/runner.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/views/home.js"></script>
+<script src="js/views/path.js"></script>
+<script src="js/views/lesson.js"></script>
+<script src="js/views/practice.js"></script>
+<script src="js/views/skills.js"></script>
+<script src="js/views/profile.js"></script>
+<script src="js/views/settings.js"></script>
+<script src="js/views/playground.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+/* PyQuest — curriculum load order.
+   Add a file here and it is picked up by the app and precached for offline use. */
+window.PQ = window.PQ || {};
+PQ.CONTENT_FILES = [
+  't1-m01-first-steps.js',
+  't1-m02-variables.js',
+  't1-m03-operators.js',
+  't1-m04-decisions.js',
+  't1-m05-loops.js',
+  't1-m06-functions.js',
+  't1-m07-strings.js',
+  't1-m08-lists.js',
+  't2-m09-lists2.js',
+  't2-m10-dicts-sets.js',
+  't2-m11-comprehensions.js',
+  't2-m12-functions2.js',
+  't2-m13-errors.js',
+  't2-m14-files.js',
+  't2-m15-modules.js',
+  't2-m16-oop1.js',
+  't3-m17-oop2.js',
+  't3-m18-generators.js',
+  't3-m19-decorators.js',
+  't3-m20-testing.js',
+  't3-m21-algorithms.js',
+  't3-m22-regex.js',
+  't3-m23-databases.js',
+  't3-m24-apis.js',
+  't4-m25-typing.js',
+  't4-m26-concurrency.js',
+  't4-m27-performance.js',
+  't4-m28-architecture.js',
+  't4-m29-professional.js',
+  't4-m30-capstone.js'
+];

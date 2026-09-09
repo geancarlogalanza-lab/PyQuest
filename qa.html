@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyQuest — content QA</title>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  body{padding:20px;font-family:var(--sans)}
+  .r{padding:6px 10px;border-radius:8px;margin:3px 0;font-size:.85rem;font-family:var(--mono)}
+  .ok{background:var(--ok-soft);color:var(--ok)}
+  .bad{background:var(--err-soft);color:var(--err);white-space:pre-wrap}
+  .warn{background:var(--warn-soft);color:var(--warn)}
+  #sum{position:sticky;top:0;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);z-index:5}
+</style>
+</head>
+<body>
+<h1>PyQuest content QA</h1>
+<p class="muted">Runs every reference solution against its own test suite, plus structural checks.
+Open the console for details. <button class="btn" id="go">Run all</button>
+<button class="btn ghost" id="failonly">Show failures only</button></p>
+<div id="sum" class="muted">idle</div>
+<div id="out"></div>
+
+<script src="js/util.js"></script>
+<script src="js/store.js"></script>
+<script src="js/content.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/errors.js"></script>
+<script src="js/runner.js"></script>
+<script>
+(async function () {
+  const out = document.getElementById('out');
+  const sum = document.getElementById('sum');
+  let failOnly = false;
+  document.getElementById('failonly').onclick = () => {
+    failOnly = !failOnly;
+    document.querySelectorAll('.r.ok').forEach(n => n.style.display = failOnly ? 'none' : '');
+  };
+
+  function line(cls, text) {
+    const d = document.createElement('div');
+    d.className = 'r ' + cls;
+    d.textContent = text;
+    if (failOnly && cls === 'ok') d.style.display = 'none';
+    out.appendChild(d);
+    return d;
+  }
+
+  await PQ.store.get('events', []);
+  await PQ.engine.init();
+  sum.textContent = 'loading curriculum…';
+  await PQ.content.loadAll();
+
+  const stats = { total: 0, pass: 0, fail: 0, warn: 0, skipped: 0 };
+
+  function structural() {
+    const seen = new Set();
+    PQ.content.allExercises().forEach(ex => {
+      if (seen.has(ex.id)) { line('bad', 'DUPLICATE exercise id: ' + ex.id); stats.warn++; }
+      seen.add(ex.id);
+      const where = ex.moduleId + '/' + ex.id + ' — ' + (ex.title || '');
+      if (ex.kind === 'quiz' || ex.kind === 'predict') {
+        if (!Array.isArray(ex.choices) || ex.choices.length < 2) { line('bad', 'BAD CHOICES ' + where); stats.warn++; }
+        if (typeof ex.answer !== 'number' || ex.answer < 0 || ex.answer >= (ex.choices || []).length) { line('bad', 'BAD ANSWER INDEX ' + where); stats.warn++; }
+        if (!ex.explain) { line('warn', 'no explanation: ' + where); stats.warn++; }
+      } else {
+        if (!ex.tests || !ex.tests.length) { line('bad', 'NO TESTS ' + where); stats.warn++; }
+        (ex.tests || []).forEach(t => {
+          if (t.code && /^\s*assert\s+True\s*$/.test(t.code)) { line('bad', 'FAKE TEST (assert True) ' + where + ' :: ' + t.name); stats.warn++; }
+          if (!t.name) { line('warn', 'unnamed test in ' + where); stats.warn++; }
+        });
+        if (!ex.solution && !ex.checkpoint) { line('warn', 'no reference solution: ' + where); stats.warn++; }
+      }
+      (ex.concepts || []).forEach(c => {
+        if (!PQ.content.getConcept(c).name || PQ.content.getConcept(c).name === c) {
+          if (!PQ.content.allConcepts().some(x => x.id === c)) { line('warn', 'undeclared concept "' + c + '" in ' + where); stats.warn++; }
+        }
+      });
+    });
+    PQ.content.allUnits().forEach(u => {
+      if (u.kind === 'lesson' && !u.content) { line('bad', 'LESSON WITH NO CONTENT ' + u.id); stats.warn++; }
+      if (u.kind === 'checkpoint' && (!u.items || u.items.length < 3)) { line('bad', 'THIN CHECKPOINT ' + u.id); stats.warn++; }
+    });
+  }
+
+  async function runSolutions() {
+    const exs = PQ.content.allExercises().filter(e => e.solution && e.kind !== 'quiz' && e.kind !== 'predict');
+    for (const ex of exs) {
+      stats.total++;
+      const where = ex.moduleId + '/' + ex.id + ' — ' + (ex.title || '');
+      // static checks first
+      const bad = [];
+      (ex.requires || []).forEach(r => {
+        const hit = r.re ? new RegExp(r.re).test(ex.solution) : ex.solution.includes(r.contains);
+        if (!hit) bad.push('solution fails requires: ' + (r.msg || r.contains || r.re));
+      });
+      (ex.forbids || []).forEach(r => {
+        const hit = r.re ? new RegExp(r.re).test(ex.solution) : ex.solution.includes(r.contains);
+        if (hit) bad.push('solution violates forbids: ' + (r.msg || r.contains || r.re));
+      });
+      const res = await PQ.runner.grade({ code: ex.solution, stdin: ex.stdin || [], files: ex.files || null, tests: ex.tests || [] });
+      if (res.error) bad.push('ERROR: ' + res.error.split('\n').slice(-2).join(' | '));
+      (res.tests || []).forEach(t => { if (!t.ok) bad.push('FAILED [' + t.name + '] ' + (t.msg || '').split('\n').join(' / ')); });
+      if (bad.length) { stats.fail++; line('bad', '✗ ' + where + '\n   ' + bad.join('\n   ')); }
+      else { stats.pass++; line('ok', '✓ ' + where); }
+      sum.textContent = `${stats.pass} pass · ${stats.fail} fail · ${stats.warn} warnings · ${stats.total} run`;
+    }
+  }
+
+  async function runProjects() {
+    for (const m of PQ.content.allModules()) {
+      const p = m.project;
+      if (!p) continue;
+      if (!p.solution) { line('warn', 'project has no reference solution: ' + p.id); stats.warn++; continue; }
+      for (let i = 0; i < (p.stages || []).length; i++) {
+        const s = p.stages[i];
+        stats.total++;
+        const res = await PQ.runner.grade({ code: p.solution, stdin: s.stdin || p.stdin || [], files: p.files || null, tests: s.tests || [] }, 20000);
+        const bad = [];
+        if (res.error) bad.push('ERROR: ' + res.error.split('\n').slice(-2).join(' | '));
+        (res.tests || []).forEach(t => { if (!t.ok) bad.push('FAILED [' + t.name + '] ' + (t.msg || '').split('\n').join(' / ')); });
+        if (bad.length) { stats.fail++; line('bad', '✗ ' + p.id + ' stage ' + (i + 1) + ' (' + s.title + ')\n   ' + bad.join('\n   ')); }
+        else { stats.pass++; line('ok', '✓ ' + p.id + ' stage ' + (i + 1) + ' — ' + s.title); }
+        sum.textContent = `${stats.pass} pass · ${stats.fail} fail · ${stats.warn} warnings · ${stats.total} run`;
+      }
+    }
+  }
+
+  async function all() {
+    out.innerHTML = '';
+    stats.total = stats.pass = stats.fail = stats.warn = 0;
+    sum.textContent = 'structural checks…';
+    structural();
+    sum.textContent = 'starting python…';
+    await PQ.runner.whenReady();
+    await runSolutions();
+    await runProjects();
+    sum.textContent = `DONE — ${stats.pass} pass · ${stats.fail} fail · ${stats.warn} warnings`;
+    sum.className = stats.fail || stats.warn ? 'bad' : 'ok';
+    window.__QA = stats;
+  }
+
+  document.getElementById('go').onclick = all;
+  all();
+})();
+</script>
+</body>
+</html>

@@ -3,12 +3,22 @@
 A gamified journey from absolute beginner to professional Python. Runs **real CPython** in your
 browser, works **offline**, and keeps your progress on your phone and your laptop.
 
+### ▶ [Open PyQuest](https://geancarlogalanza-lab.github.io/PyQuest/)
+
+No install, no server, nothing to sign up for. Open it on a laptop or a phone, then use your
+browser's *Install app* / *Add to Home Screen* for a full-screen icon that works offline.
+
+<details>
+<summary><b>Running it locally instead</b></summary>
+
 ```bash
 node serve.js
 ```
 
 Then open **http://localhost:8080**. The terminal also prints a `http://192.168.x.x:8080` address —
 open that on your phone (same Wi-Fi) to use it there.
+
+</details>
 
 ---
 
@@ -221,8 +231,9 @@ Exercises can declare `files: {'data.csv': '...'}` to give the program a real fi
 
 ### Verify what you write
 
-Open **http://localhost:8080/qa.html**. It runs every reference solution against its own test suite
-plus structural checks, and reports anything broken.
+Open [**/qa.html**](https://geancarlogalanza-lab.github.io/PyQuest/qa.html) (or
+`http://localhost:8080/qa.html`). It runs every reference solution against its own test suite plus
+structural checks, and reports anything broken.
 
 The shipped curriculum passes **282/282**.
 

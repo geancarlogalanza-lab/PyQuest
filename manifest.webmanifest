@@ -1,21 +1,40 @@
 {
   "name": "PyQuest — Python Mastery",
   "short_name": "PyQuest",
-  "description": "A gamified journey from absolute beginner to professional Python. Works offline.",
+  "description": "A gamified journey from absolute beginner to professional Python. Real CPython in your browser, works offline.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
-  "categories": ["education", "productivity"],
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity", "developer"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
-    { "name": "Continue learning", "url": "./index.html#/home" },
-    { "name": "Review", "url": "./index.html#/practice" },
-    { "name": "Playground", "url": "./index.html#/playground" }
+    {
+      "name": "Continue learning",
+      "short_name": "Continue",
+      "url": "./index.html#/home",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Review session",
+      "short_name": "Review",
+      "url": "./index.html#/practice",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Playground",
+      "short_name": "Playground",
+      "url": "./index.html#/playground",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }

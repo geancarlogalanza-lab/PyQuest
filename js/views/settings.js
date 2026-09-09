@@ -8,13 +8,18 @@
     const S = PQ.engine.settings;
     const wrap = el('div', { class: 'wrap' });
     host.appendChild(wrap);
-    PQ.ui.topbar([el('h1', { style: 'margin:0;font-size:1.2rem', text: 'Settings' }), el('span', { style: 'flex:1' })]);
+    PQ.ui.topbar([el('h1', { text: 'Settings' }), el('span', { class: 'grow' })]);
+
+    /* ---------- install ---------- */
+    const installBox = el('div');
+    wrap.appendChild(section('Install as an app', [installBox]));
+    paintInstall(installBox);
 
     /* ---------- appearance ---------- */
     wrap.appendChild(section('Appearance', [
       row('Theme', seg(['dark', 'light'], S.theme, v => {
         S.theme = v; document.documentElement.dataset.theme = v;
-        document.querySelector('meta[name=theme-color]').setAttribute('content', v === 'dark' ? '#0d1117' : '#f7f9fc');
+        document.querySelector('meta[name=theme-color]').setAttribute('content', v === 'dark' ? '#0b0e14' : '#f6f8fb');
         PQ.engine.saveSettings();
       })),
       row('Code size', seg(['13', '14', '16', '18'], String(S.codeSize), v => {
@@ -55,6 +60,53 @@
         'PyQuest runs real CPython in your browser via Pyodide — the same interpreter semantics, the same tracebacks, no server involved.\n\n' +
         '**Keyboard:** `Ctrl`/`Cmd`+`Enter` runs your code, `Shift`+`Enter` checks it, `Ctrl`/`Cmd`+`/` toggles a comment.\n\n' +
         '**Install it:** use your browser\'s *Install app* / *Add to Home Screen* to get a full-screen icon on phone or laptop.') })
+    ]));
+  }
+
+  /* ---------------- install ---------------- */
+  /* Three states, because the browsers genuinely differ: Chrome and Edge hand
+     us a real prompt, iOS Safari has no API at all and needs instructions, and
+     an already-installed app should say so rather than offer a dead button. */
+  function paintInstall(box) {
+    const inst = PQ.install || {};
+    box.innerHTML = '';
+
+    if (inst.standalone) {
+      box.appendChild(el('div', { class: 'row' }, [
+        el('span', { class: 'pill ok', text: 'Installed' }),
+        el('span', { class: 'small muted', text: 'You are running PyQuest as an app.' })
+      ]));
+      return;
+    }
+
+    box.appendChild(el('p', { class: 'muted small',
+      text: 'Installing gives PyQuest its own icon and a full-screen window, and it keeps working with no connection. It is the same app — nothing is downloaded from a store.' }));
+
+    if (inst.available) {
+      const btn = el('button', { class: 'btn primary', onclick: async () => {
+        btn.disabled = true;
+        const outcome = await inst.prompt();
+        btn.disabled = false;
+        if (outcome === 'dismissed') PQ.ui.toast('Install cancelled', '');
+        paintInstall(box);
+      } }, [PQ.icon('download', 15), el('span', { text: 'Install PyQuest' })]);
+      box.appendChild(btn);
+      return;
+    }
+
+    /* No prompt available — tell them exactly where the control lives. */
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(ua);
+    const steps = isIOS
+      ? ['Open this page in **Safari** (other iOS browsers cannot install apps).', 'Tap the **Share** button.', 'Choose **Add to Home Screen**.']
+      : isAndroid
+        ? ['Tap the **⋮** menu in your browser.', 'Choose **Add to Home screen** or **Install app**.']
+        : ['Look for the **install icon** in the address bar.', 'Or open the browser menu and choose **Install PyQuest**.'];
+
+    box.appendChild(el('div', { class: 'callout tip' }, [
+      el('span', { class: 'ct', text: isIOS ? 'On iPhone and iPad' : isAndroid ? 'On Android' : 'On this browser' }),
+      el('div', { class: 'prose', html: PQ.util.md(steps.map((t, i) => (i + 1) + '. ' + t).join('\n')) })
     ]));
   }
 

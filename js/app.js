@@ -5,6 +5,44 @@
 
   function setBoot(msg) { const n = $('#boot-sub'); if (n) n.textContent = msg; }
 
+  /* ---------------- install ----------------
+     Chrome fires beforeinstallprompt once, early, and only if the app is
+     installable. Capture it so Settings can offer a real install button
+     instead of asking people to hunt through a browser menu. */
+  const install = {
+    deferred: null,
+    installed: false,
+    listeners: [],
+    get standalone() {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+    },
+    get available() { return !!install.deferred; },
+    on(fn) { install.listeners.push(fn); return () => { install.listeners = install.listeners.filter(f => f !== fn); }; },
+    emit() { install.listeners.forEach(f => { try { f(install); } catch (e) { console.error(e); } }); },
+    async prompt() {
+      if (!install.deferred) return 'unavailable';
+      install.deferred.prompt();
+      const { outcome } = await install.deferred.userChoice;
+      if (outcome === 'accepted') { install.deferred = null; }
+      install.emit();
+      return outcome;
+    }
+  };
+  PQ.install = install;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    install.deferred = e;
+    install.emit();
+  });
+  window.addEventListener('appinstalled', () => {
+    install.deferred = null;
+    install.installed = true;
+    install.emit();
+    if (PQ.ui) PQ.ui.toast('PyQuest installed', 'ok');
+  });
+
   async function main() {
     document.body.classList.toggle('touch', matchMedia('(pointer: coarse)').matches);
 

@@ -5,8 +5,31 @@ browser, works **offline**, and keeps your progress on your phone and your lapto
 
 ### ▶ [Open PyQuest](https://geancarlogalanza-lab.github.io/PyQuest/)
 
-No install, no server, nothing to sign up for. Open it on a laptop or a phone, then use your
-browser's *Install app* / *Add to Home Screen* for a full-screen icon that works offline.
+No server, no account, nothing to sign up for.
+
+## Install it on your phone
+
+PyQuest is a **progressive web app**, so it installs straight from the browser — a real icon on your
+home screen, a full-screen window with no address bar, and it keeps working with no connection.
+There is no app store and nothing to download separately.
+
+**Android (Chrome, Edge, Samsung Internet)**
+1. Open [the app](https://geancarlogalanza-lab.github.io/PyQuest/)
+2. Go to **Settings → Install as an app → Install PyQuest**, or tap the browser's **⋮** menu and choose **Install app**
+
+**iPhone and iPad**
+1. Open [the app](https://geancarlogalanza-lab.github.io/PyQuest/) **in Safari** — other iOS browsers cannot install web apps
+2. Tap **Share**, then **Add to Home Screen**
+
+**Laptop (Chrome, Edge)**
+Click the install icon in the address bar, or use **Settings → Install as an app**.
+
+Once installed, open Settings → Offline → **Download Python for offline use** while you still have a
+connection. After that it runs with the network off — on a plane, on the underground, anywhere.
+
+> Want a real  for sideloading or the Play Store? Point
+> [PWABuilder](https://www.pwabuilder.com/) at the URL above — the manifest and service worker are
+> already set up for it, so it will package a signed Android app without any code changes.
 
 <details>
 <summary><b>Running it locally instead</b></summary>

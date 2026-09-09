@@ -1,11 +1,20 @@
-# PyQuest
+<p align="center">
+  <img src="icons/icon-192.png" width="92" height="92" alt="">
+</p>
 
-A gamified journey from absolute beginner to professional Python. Runs **real CPython** in your
-browser, works **offline**, and keeps your progress on your phone and your laptop.
+<h1 align="center">PyQuest</h1>
 
-### ▶ [Open PyQuest](https://geancarlogalanza-lab.github.io/PyQuest/)
+<p align="center">
+  A gamified journey from absolute beginner to professional Python.<br>
+  Runs <b>real CPython</b> in your browser, works <b>offline</b>, and keeps your progress on your
+  phone and your laptop.
+</p>
 
-No server, no account, nothing to sign up for.
+<p align="center">
+  <a href="https://geancarlogalanza-lab.github.io/PyQuest/"><b>▶&nbsp; Open PyQuest</b></a>
+</p>
+
+<p align="center"><sub>No server, no account, nothing to sign up for.</sub></p>
 
 ## Install it on your phone
 

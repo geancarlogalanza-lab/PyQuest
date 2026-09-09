@@ -66,6 +66,35 @@ function render(size, maskable) {
   return px;
 }
 
+/* The link-preview card: not square, no rounded corners, and the mark simply
+   centred on black. The words come from the og:title beside it, so the image
+   stays the mark and nothing else. */
+function renderCard(w, h) {
+  const SS = 3;
+  const gridPx = h * 0.72;          // how big the 1080 design grid is drawn
+  const px = Buffer.alloc(w * h * 4);
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let fgHits = 0;
+      for (let sy = 0; sy < SS; sy++) {
+        for (let sx = 0; sx < SS; sx++) {
+          const fx = x + (sx + 0.5) / SS;
+          const fy = y + (sy + 0.5) / SS;
+          const g = logo.GRID / gridPx;
+          if (logo.isGreen((fx - w / 2) * g + logo.GRID / 2,
+                           (fy - h / 2) * g + logo.GRID / 2)) fgHits++;
+        }
+      }
+      const fgA = fgHits / (SS * SS);
+      const i = (y * w + x) * 4;
+      for (let c = 0; c < 3; c++) px[i + c] = Math.round(FG[c] * fgA + BG[c] * (1 - fgA));
+      px[i + 3] = 255;              // the card is fully opaque
+    }
+  }
+  return px;
+}
+
 /* ---------- minimal PNG writer ---------- */
 const CRC_TABLE = (() => {
   const t = new Int32Array(256);
@@ -92,16 +121,16 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc]);
 }
 
-function png(size, pixels) {
+function png(w, h, pixels) {
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
+  ihdr.writeUInt32BE(w, 0);
+  ihdr.writeUInt32BE(h, 4);
   ihdr[8] = 8; ihdr[9] = 6;   // 8-bit RGBA
-  const stride = size * 4 + 1;
-  const raw = Buffer.alloc(size * stride);
-  for (let y = 0; y < size; y++) {
+  const stride = w * 4 + 1;
+  const raw = Buffer.alloc(h * stride);
+  for (let y = 0; y < h; y++) {
     raw[y * stride] = 0;      // filter: none
-    pixels.copy(raw, y * stride + 1, y * size * 4, (y + 1) * size * 4);
+    pixels.copy(raw, y * stride + 1, y * w * 4, (y + 1) * w * 4);
   }
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
@@ -135,9 +164,14 @@ const PNGS = [
 fs.mkdirSync(OUT, { recursive: true });
 for (const [name, size, maskable] of PNGS) {
   const file = path.join(OUT, name);
-  fs.writeFileSync(file, png(size, render(size, maskable)));
+  fs.writeFileSync(file, png(size, size, render(size, maskable)));
   console.log(`  ${name.padEnd(24)} ${size}x${size}  ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
 }
+const CARD = [1200, 630];
+const cardFile = path.join(OUT, 'social.png');
+fs.writeFileSync(cardFile, png(CARD[0], CARD[1], renderCard(CARD[0], CARD[1])));
+console.log(`  ${'social.png'.padEnd(24)} ${CARD[0]}x${CARD[1]}  ${(fs.statSync(cardFile).size / 1024).toFixed(1)} KB`);
+
 fs.writeFileSync(path.join(OUT, 'icon.svg'), svg(false));
 fs.writeFileSync(path.join(OUT, 'icon-maskable.svg'), svg(true));
 console.log('  icon.svg / icon-maskable.svg');

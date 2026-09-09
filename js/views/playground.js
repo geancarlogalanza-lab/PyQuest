@@ -17,7 +17,7 @@
     const wrap = el('div', { class: 'wrap wide' });
     host.appendChild(wrap);
     PQ.ui.topbar([
-      el('h1', { style: 'margin:0;font-size:1.2rem', text: '🐍 Playground' }),
+      el('h1', { text: 'Playground' }),
       el('span', { style: 'flex:1' }),
       PQ.ui.statusChip()
     ]);
@@ -50,10 +50,11 @@
     ]);
     wrap.appendChild(stdinWrap);
 
-    const runBtn = el('button', { class: 'btn primary lg', html: '▸ Run', onclick: () => run() });
+    const runBtn = el('button', { class: 'btn primary lg', onclick: () => run() },
+      [PQ.icon('play', 14), el('span', { text: 'Run' })]);
     wrap.appendChild(el('div', { class: 'btn-group sticky-actions' }, [
       runBtn,
-      el('button', { class: 'btn ghost', text: '🧹 Clear output', onclick: () => { out.classList.add('hidden'); } }),
+      el('button', { class: 'btn ghost', text: 'Clear output', onclick: () => { out.classList.add('hidden'); } }),
       el('span', { class: 'tiny dim hide-mobile', style: 'align-self:center;margin-left:auto', html: '<span class="kbd">Ctrl</span>+<span class="kbd">↵</span> to run' })
     ]));
 
@@ -61,12 +62,16 @@
     wrap.appendChild(out);
 
     async function run() {
-      runBtn.disabled = true; runBtn.innerHTML = '<span class="spinner"></span> running';
+      runBtn.disabled = true; runBtn.innerHTML = '';
+      runBtn.appendChild(el('span', { class: 'spinner' }));
+      runBtn.appendChild(el('span', { text: 'Running' }));
       const stdin = stdinBox.value ? stdinBox.value.split('\n') : [];
       const t0 = performance.now();
       const r = await PQ.runner.exec({ code: ed.value, stdin });
       const ms = Math.round(performance.now() - t0);
-      runBtn.disabled = false; runBtn.innerHTML = '▸ Run';
+      runBtn.disabled = false; runBtn.innerHTML = '';
+      runBtn.appendChild(PQ.icon('play', 14));
+      runBtn.appendChild(el('span', { text: 'Run' }));
       PQ.engine.record('playground', { runs: 1 });
       out.classList.remove('hidden');
       out.innerHTML = '';

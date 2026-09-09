@@ -115,7 +115,7 @@
       el('span', { style: 'font-weight:600;font-size:.92rem', text: 'Offline app cache' }),
       el('span', {
         class: 'pill ' + (swReady ? 'ok' : 'warn'),
-        text: swReady ? '✓ active' : (swSupported ? 'not registered yet' : 'unsupported here')
+        text: swReady ? 'active' : (swSupported ? 'not registered yet' : 'unsupported here')
       })
     ]));
     if (!swReady) {
@@ -126,7 +126,7 @@
 
     const persisted = navigator.storage && navigator.storage.persisted ? await navigator.storage.persisted() : false;
     box.appendChild(el('div', { class: 'row mt', style: 'gap:8px' }, [
-      el('span', { class: 'pill ' + (persisted ? 'ok' : 'warn'), text: persisted ? '🔒 storage protected' : '⚠ storage evictable' }),
+      el('span', { class: 'pill ' + (persisted ? 'ok' : 'warn'), text: persisted ? 'storage protected' : 'storage evictable' }),
       !persisted ? el('button', {
         class: 'btn sm ghost', text: 'Ask browser to protect it',
         onclick: async () => {
@@ -149,16 +149,17 @@
         el('span', { class: 'ct', text: 'Backup file — works everywhere, no account' }),
         el('p', { class: 'small', text: 'Export on one device, import on the other. Importing merges: it can only ever add progress, never remove it.' }),
         el('div', { class: 'btn-group' }, [
-          el('button', { class: 'btn', text: '⬇ Export backup', onclick: () => { PQ.sync.exportFile(); PQ.ui.toast('Backup downloaded', 'ok'); } }),
+          el('button', { class: 'btn', onclick: () => { PQ.sync.exportFile(); PQ.ui.toast('Backup downloaded', 'ok'); } },
+            [PQ.icon('download', 15), el('span', { text: 'Export backup' })]),
           el('button', {
-            class: 'btn', text: '⬆ Import backup', onclick: async () => {
+            class: 'btn', onclick: async () => {
               try {
                 const r = await PQ.sync.importFile();
                 PQ.ui.toast('Merged ' + r.added + ' new events', 'ok');
                 PQ.ui.render();
               } catch (e) { PQ.ui.toast(e.message || 'Import failed', 'err'); }
             }
-          })
+          }, [PQ.icon('upload', 15), el('span', { text: 'Import backup' })])
         ])
       ]));
 
@@ -213,7 +214,7 @@
         if (s.error) cloud.appendChild(el('div', { class: 'callout trap' }, [el('span', { class: 'ct', text: 'Last sync failed' }), el('p', { class: 'small', text: s.error })]));
         cloud.appendChild(el('div', { class: 'btn-group mt' }, [
           el('button', {
-            class: 'btn primary', text: s.busy ? 'Syncing…' : '⇅ Sync now', disabled: s.busy,
+            class: 'btn primary', text: s.busy ? 'Syncing…' : 'Sync now', disabled: s.busy,
             onclick: async () => { const r = await PQ.sync.syncNow(); PQ.ui.toast(r.ok ? 'Synced' : (r.error || r.skipped), r.ok ? 'ok' : 'err'); paint(); }
           }),
           el('button', { class: 'btn ghost', text: 'Sign out', onclick: async () => { await PQ.sync.signOut(); paint(); } })

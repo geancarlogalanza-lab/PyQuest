@@ -28,7 +28,7 @@
     const legend = el('div', { class: 'row wrap mt', style: 'gap:10px' });
     [4, 3, 2, 1, 0].forEach(b => {
       legend.appendChild(el('span', { class: 'row tiny dim', style: 'gap:5px' }, [
-        el('span', { class: 'bar s' + b, style: 'width:22px;height:6px;display:inline-block' }, [el('i', { style: 'width:100%' })]),
+        el('span', { class: 'bar s' + b, style: 'width:20px;height:5px;display:inline-block;flex:0 0 auto' }, [el('i', { style: 'width:100%' })]),
         el('span', { text: LABEL[b] })
       ]));
     });
@@ -44,7 +44,7 @@
       ]));
       mods.forEach(m => {
         if (!(m.concepts || []).length) return;
-        sec.appendChild(el('div', { class: 'small muted', style: 'margin:12px 0 6px;font-weight:700', text: m.icon + ' ' + m.title }));
+        sec.appendChild(el('div', { class: 'section-label', style: 'margin:var(--s4) 0 var(--s2)', text: m.order + '. ' + m.title }));
         const grid = el('div', { class: 'skillgrid' });
         m.concepts.forEach(c => {
           const s = PQ.engine.strengthOf(c.id);

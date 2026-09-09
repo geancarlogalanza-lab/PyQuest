@@ -16,8 +16,10 @@
     const solvedCount = Object.values(E.state.exercises).filter(e => e.solved).length;
 
     if (!solvedCount) {
+      const seed = el('div', { class: 'es-ico' });
+      seed.appendChild(PQ.icon('review', 22));
       wrap.appendChild(el('div', { class: 'empty-state' }, [
-        el('div', { class: 'es-ico', text: '🌱' }),
+        seed,
         el('h2', { text: 'Nothing to review yet' }),
         el('p', { text: 'Solve a few challenges first. Everything you solve comes back here on a spaced schedule so it actually sticks.' }),
         el('button', { class: 'btn primary mt', text: 'Start learning', onclick: () => PQ.ui.go('#/home') })
@@ -30,7 +32,7 @@
     wrap.appendChild(el('div', { class: 'card pad-lg' }, [
       el('div', { class: 'spread' }, [
         el('div', [
-          el('h2', { style: 'margin:0', text: '🔁 Review session' }),
+          el('h2', { style: 'margin:0', text: 'Review session' }),
           el('div', { class: 'muted small', text: due ? U.plural(due, 'skill') + ' due right now' : 'Nothing overdue — a session still strengthens your weakest skills.' })
         ]),
         el('span', { class: 'pill ' + (due ? 'warn' : 'ok'), text: due ? due + ' due' : 'all fresh' })
@@ -58,7 +60,7 @@
         class: 'lesson-row',
         onclick: () => session(host, Math.min(8, exs.length), exs)
       }, [
-        el('div', { class: 'lr-ico', text: m.icon || '📘' }),
+        el('div', { class: 'lr-ico' }, [el('span', { text: String(m.order) })]),
         el('div', { class: 'lr-body' }, [
           el('div', { class: 'lr-title', text: m.title }),
           el('div', { class: 'lr-sub', text: U.plural(exs.length, 'solved challenge') + ' available' })
@@ -133,7 +135,7 @@
       shell.innerHTML = '';
       shell.appendChild(el('div', { class: 'wrap' }, [
         el('div', { class: 'card pad-lg center' }, [
-          el('div', { style: 'font-size:2.8rem', text: right === items.length ? '🧠' : right >= items.length / 2 ? '👍' : '📚' }),
+          reviewMark(right, items.length),
           el('h1', { text: 'Review complete' }),
           el('p', { class: 'muted', text: right + ' of ' + items.length + ' recalled without help.' }),
           el('div', { class: 'grid g3 mt' }, [
@@ -150,6 +152,14 @@
     }
 
     paint();
+  }
+
+  function reviewMark(right, total) {
+    const good = right === total;
+    const ok = right >= total / 2;
+    const m = el('div', { style: 'display:grid;place-items:center;width:48px;height:48px;margin:0 auto var(--s3);border-radius:50%;background:' + (good ? 'var(--ok-soft);color:var(--ok)' : ok ? 'var(--acc-soft);color:var(--acc)' : 'var(--warn-soft);color:var(--warn)') });
+    m.appendChild(PQ.icon(good ? 'check' : 'review', 24));
+    return m;
   }
 
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }

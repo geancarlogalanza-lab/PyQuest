@@ -12,15 +12,16 @@
     PQ.ui.topbar([
       el('h1', { style: 'margin:0;font-size:1.2rem', text: 'Profile' }),
       el('span', { style: 'flex:1' }),
-      el('button', { class: 'btn ghost sm', text: '⚙️ Settings', onclick: () => PQ.ui.go('#/settings') })
+      el('button', { class: 'btn ghost sm', onclick: () => PQ.ui.go('#/settings') },
+        [PQ.icon('settings', 15), el('span', { text: 'Settings' })])
     ]);
 
     wrap.appendChild(el('div', { class: 'hero' }, [
       el('div', { class: 'row', style: 'gap:16px;flex-wrap:wrap' }, [
         el('div', { class: 'lvl-ring', style: '--p:' + li.pct + '%;width:74px;height:74px' }, [el('span', { style: 'font-size:1.35rem', text: String(li.level) })]),
         el('div', { style: 'flex:1;min-width:180px' }, [
-          el('div', { style: 'font-size:1.25rem;font-weight:800', text: rank.icon + ' ' + rank.name }),
-          el('div', { class: 'muted small', text: st.xp.toLocaleString() + ' XP total' + (li.max ? '' : ' · ' + (li.span - li.into) + ' to next level') }),
+          el('div', { style: 'font-size:var(--t-lg);font-weight:650', text: rank.name }),
+          el('div', { class: 'muted small', text: st.xp.toLocaleString() + ' XP' + (li.max ? ' · maximum level' : ' · ' + (li.span - li.into).toLocaleString() + ' XP to level ' + (li.level + 1)) }),
           el('div', { class: 'bar mt', style: 'margin-top:8px' }, [el('i', { style: 'width:' + li.pct + '%' })])
         ])
       ])
@@ -49,9 +50,9 @@
     wrap.appendChild(el('h2', { class: 'mt-lg', text: 'Habits' }));
     wrap.appendChild(el('div', { class: 'card' }, [
       el('div', { class: 'spread' }, [
-        el('div', [el('div', { style: 'font-weight:700', text: '🔥 ' + U.plural(streak.current, 'day') + ' streak' }),
+        el('div', [el('div', { style: 'font-weight:650', text: U.plural(streak.current, 'day') + ' streak' }),
           el('div', { class: 'tiny dim', text: 'Best: ' + streak.best + ' · ' + U.plural(Object.keys(st.days).length, 'active day') + ' total' })]),
-        streak.freezes ? el('span', { class: 'pill acc', text: '🧊 ' + streak.freezes + ' freeze' }) : null
+        streak.freezes ? el('span', { class: 'pill acc', text: U.plural(streak.freezes, 'freeze') + ' banked' }) : null
       ]),
       el('div', { class: 'streak-days', style: 'margin-top:12px' },
         streak.days.map(d => el('i', { class: (d.on ? 'on' : '') + (d.today ? ' today' : ''), text: d.label })))
@@ -68,7 +69,7 @@
     unlocked.concat(locked).forEach(a => {
       const on = !!st.achievements[a.id];
       grid.appendChild(el('div', { class: 'ach' + (on ? '' : ' locked') }, [
-        el('div', { class: 'ai', text: on ? a.icon : '🔒' }),
+        achMark(on, a),
         el('div', { style: 'min-width:0' }, [
           el('div', { class: 'an', text: a.name }),
           el('div', { class: 'ad', text: a.desc }),
@@ -77,6 +78,15 @@
       ]));
     });
     wrap.appendChild(grid);
+  }
+
+  /* Achievements keep their emoji — they are earned badges, and a badge is
+     the one place where a picture is the content rather than decoration. */
+  function achMark(unlocked, a) {
+    if (unlocked) return el('div', { class: 'ai', text: a.icon });
+    const m = el('div', { class: 'ai', style: 'display:grid;place-items:center;color:var(--fg-3)' });
+    m.appendChild(PQ.icon('lock', 15));
+    return m;
   }
 
   function heatmap(st) {

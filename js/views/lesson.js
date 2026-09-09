@@ -8,6 +8,34 @@
   /* Exercise player                                                       */
   /* ==================================================================== */
 
+  /* Buttons keep a stable shape while busy: same icon slot, swapped for a spinner. */
+  function setBusy(btn, label) {
+    btn.innerHTML = '';
+    btn.appendChild(el('span', { class: 'spinner' }));
+    btn.appendChild(el('span', { text: label }));
+  }
+  function setLabel(btn, iconName, label) {
+    btn.innerHTML = '';
+    btn.appendChild(PQ.icon(iconName, iconName === 'play' ? 13 : 15));
+    btn.appendChild(el('span', { text: label }));
+  }
+  function cpMark() {
+    const m = el('div', { style: 'display:grid;place-items:center;width:40px;height:40px;border-radius:var(--r-md);background:var(--acc-soft);color:var(--acc);flex:0 0 auto' });
+    m.appendChild(PQ.icon('checkpoint', 20));
+    return m;
+  }
+  function resultMark(passed) {
+    const m = el('div', { style: 'display:grid;place-items:center;width:48px;height:48px;margin:0 auto var(--s3);border-radius:50%;background:' + (passed ? 'var(--ok-soft);color:var(--ok)' : 'var(--err-soft);color:var(--err)') });
+    m.appendChild(PQ.icon(passed ? 'checkpoint' : 'cross', 24));
+    return m;
+  }
+  function stageMark(done, i) {
+    const m = el('div', { class: 'lr-ico' });
+    if (done) m.appendChild(PQ.icon('check', 15));
+    else m.appendChild(el('span', { text: String(i + 1) }));
+    return m;
+  }
+
   function staticChecks(ex, code) {
     const out = [];
     (ex.requires || []).forEach(r => {
@@ -38,15 +66,18 @@
 
     /* header */
     const kind = ex.kind || 'code';
+    const kindMark = el('div', { class: 'ex-kind k-' + kind });
+    kindMark.appendChild(PQ.icon(PQ.ui.KIND_ICON[kind] || 'code', 17));
+    const metaLine = el('div', { class: 'meta' }, [
+      el('span', { text: PQ.ui.KIND_NAME[kind] || 'Exercise' }),
+      el('span', { class: 'meta-item' }, [PQ.ui.diffDots(ex.difficulty || 2)]),
+      el('span', { text: PQ.content.xpFor(ex) + ' XP' })
+    ]);
     const head = el('div', { class: 'ex-head' }, [
-      el('div', { class: 'ex-kind k-' + kind, text: PQ.ui.KIND_ICON[kind] || '⌨️' }),
+      kindMark,
       el('div', { style: 'flex:1;min-width:0' }, [
-        el('div', { class: 'row wrap', style: 'gap:8px' }, [
-          el('span', { class: 'tiny dim', style: 'font-weight:700;text-transform:uppercase;letter-spacing:.07em', text: PQ.ui.KIND_NAME[kind] || 'Exercise' }),
-          PQ.ui.diffDots(ex.difficulty || 2),
-          el('span', { class: 'pill py', text: '+' + PQ.content.xpFor(ex) + ' XP' })
-        ]),
-        el('h2', { text: ex.title || 'Challenge', style: 'margin:4px 0 0' })
+        metaLine,
+        el('h2', { class: 'ex-title', text: ex.title || 'Challenge' })
       ])
     ]);
     root.appendChild(head);
@@ -129,16 +160,22 @@
     });
 
     /* action bar */
-    const runBtn = el('button', { class: 'btn', html: '▸ Run', onclick: () => run() });
-    const checkBtn = el('button', { class: 'btn primary', html: '✓ Check', onclick: () => check() });
-    const hintBtn = el('button', { class: 'btn ghost', text: '💡 Hint', onclick: () => showHint() });
-    const resetBtn = el('button', { class: 'btn ghost', text: '↺ Reset', onclick: async () => {
+    const runBtn = el('button', { class: 'btn', onclick: () => run() },
+      [PQ.icon('play', 13), el('span', { text: 'Run' })]);
+    const checkBtn = el('button', { class: 'btn primary', onclick: () => check() },
+      [PQ.icon('check', 15), el('span', { text: 'Check' })]);
+    const hintBtn = el('button', { class: 'btn ghost', onclick: () => showHint() },
+      [PQ.icon('hint', 15), el('span', { text: 'Hint' })]);
+    const resetBtn = el('button', { class: 'btn ghost', onclick: async () => {
       if (await PQ.ui.confirm('Reset your code?', 'This replaces what you have written with the starting code.', 'Reset')) {
         ed.value = ex.starter || '';
         PQ.engine.clearDraft(draftKey);
       }
     } });
-    const solBtn = el('button', { class: 'btn ghost', text: '🔓 Show solution', onclick: () => showSolution() });
+    resetBtn.appendChild(PQ.icon('reset', 15));
+    resetBtn.appendChild(el('span', { text: 'Reset' }));
+    const solBtn = el('button', { class: 'btn ghost', onclick: () => showSolution() },
+      [PQ.icon('reveal', 15), el('span', { text: 'Solution' })]);
     solBtn.classList.add('hidden');
 
     const actions = el('div', { class: 'btn-group sticky-actions' }, [runBtn, checkBtn]);
@@ -178,11 +215,11 @@
 
     async function run() {
       runBtn.disabled = checkBtn.disabled = true;
-      runBtn.innerHTML = '<span class="spinner"></span> running';
+      setBusy(runBtn, 'Running');
       runs += 1;
       const r = await PQ.runner.exec({ code: ed.value, stdin: ex.stdin || [], files: ex.files || null });
       runBtn.disabled = checkBtn.disabled = false;
-      runBtn.innerHTML = '▸ Run';
+      setLabel(runBtn, 'play', 'Run');
       showConsole(r);
       testsBox.innerHTML = '';
       return r;
@@ -191,7 +228,7 @@
     async function check() {
       if (solved && mode !== 'review') { next(); return; }
       runBtn.disabled = checkBtn.disabled = true;
-      checkBtn.innerHTML = '<span class="spinner"></span> checking';
+      setBusy(checkBtn, 'Checking');
       const code = ed.value;
       const stat = staticChecks(ex, code);
       let r;
@@ -201,7 +238,7 @@
         r = await PQ.runner.grade({ code, stdin: ex.stdin || [], files: ex.files || null, tests: ex.tests || [] });
       }
       runBtn.disabled = checkBtn.disabled = false;
-      checkBtn.innerHTML = '✓ Check';
+      setLabel(checkBtn, 'check', 'Check');
       tries += 1;
       showConsole(r);
       renderTests(r);
@@ -226,8 +263,10 @@
         el('span', { class: 'tiny ' + (passed === list.length ? 'pill ok' : 'dim'), text: passed + ' / ' + list.length + ' passing' })
       ]));
       list.forEach(t => {
+        const mark = el('span', { class: 'ti' });
+        mark.appendChild(PQ.icon(t.ok ? 'check' : 'cross', 13));
         const node = el('div', { class: 'test ' + (t.ok ? 'pass' : 'fail') }, [
-          el('span', { class: 'ti', text: t.ok ? '✓' : '✗' }),
+          mark,
           el('div', { style: 'flex:1;min-width:0' }, [
             el('span', { text: t.hidden && !t.ok && mode === 'checkpoint' ? 'Hidden check' : t.name }),
             (!t.ok && t.msg) ? el('span', { class: 'tmsg', text: t.msg }) : null
@@ -242,7 +281,7 @@
       if (win) {
         const msgs = ['Nailed it.', 'All checks green.', 'That is exactly it.', 'Clean solve.', 'Works.'];
         const box = el('div', { class: 'verdict win' }, [
-          el('h3', { text: '✓ ' + msgs[Math.floor(Math.random() * msgs.length)] }),
+          el('h3', {}, [PQ.icon('check', 17), el('span', { text: msgs[Math.floor(Math.random() * msgs.length)] })]),
           el('div', { class: 'muted small', text: tries === 1 && hints === 0 && !revealed ? 'First try, no hints — that counts double toward mastery.' : 'Solved in ' + U.plural(tries, 'attempt') + (hints ? ' with ' + U.plural(hints, 'hint') : '') + '.' })
         ]);
         if (ex.takeaway) box.appendChild(el('div', { class: 'prose mt', html: md(ex.takeaway) }));
@@ -259,7 +298,7 @@
       } else {
         const failed = (r.tests || []).filter(t => !t.ok).length;
         verdictBox.appendChild(el('div', { class: 'verdict lose' }, [
-          el('h3', { text: r.error ? '✗ Your program stopped with an error' : '✗ ' + U.plural(failed, 'check') + ' still failing' }),
+          el('h3', {}, [PQ.icon('cross', 17), el('span', { text: r.error ? 'Your program stopped with an error' : U.plural(failed, 'check') + ' still failing' })]),
           el('div', { class: 'muted small', text: r.error ? 'Fix the error first, then check again. The explanation above tells you what Python is complaining about.' : 'Read the first failing check — it tells you what was expected and what you produced.' })
         ]));
       }
@@ -274,7 +313,7 @@
       ]));
       hints += 1;
       if (hints >= hs.length) hintBtn.disabled = true;
-      hintBtn.textContent = '💡 Hint (' + (hs.length - hints) + ' left)';
+      setLabel(hintBtn, 'hint', hints >= hs.length ? 'No hints left' : 'Hint (' + (hs.length - hints) + ')');
     }
 
     async function showSolution() {
@@ -361,7 +400,7 @@
     host.appendChild(shell);
 
     function paintTop() {
-      const back = el('button', { class: 'btn ghost sm', html: '←', title: 'Back to module', onclick: () => { if (player) player.leave(); PQ.ui.go('#/module/' + mod.id); } });
+      const back = PQ.ui.backButton(() => { if (player) player.leave(); PQ.ui.go('#/module/' + mod.id); }, 'Back to module');
       const prog = el('div', { class: 'progress-line', style: 'flex:1;max-width:320px' }, [
         PQ.ui.bar(U.pct(step, total - 1), 'ok'),
         el('span', { text: step === 0 ? 'read' : step + '/' + (total - 1) })
@@ -376,12 +415,20 @@
 
       if (step === 0) {
         const wrap = el('div', { class: 'wrap' });
-        wrap.appendChild(el('div', { class: 'row wrap', style: 'gap:8px;margin-bottom:6px' }, [
-          el('span', { class: 'pill acc', text: 'Lesson' }),
-          el('span', { class: 'pill', text: '~' + (unit.minutes || 10) + ' min' }),
-          ...(unit.concepts || []).slice(0, 4).map(c => el('span', { class: 'pill', text: PQ.content.getConcept(c).name }))
+        const header = el('div', { class: 'lesson-head' });
+        header.appendChild(PQ.ui.metaRow([
+          { icon: 'lesson', text: 'Lesson' },
+          { icon: 'clock', text: (unit.minutes || 10) + ' min' },
+          exercises.length ? { text: U.plural(exercises.length, 'challenge') } : null
         ]));
-        wrap.appendChild(el('h1', { text: unit.title }));
+        header.appendChild(el('h1', { style: 'margin:var(--s2) 0', text: unit.title }));
+        if ((unit.concepts || []).length) {
+          const chips = el('div', { class: 'chips' });
+          unit.concepts.slice(0, 5).forEach(c => chips.appendChild(
+            el('span', { class: 'chip', text: PQ.content.getConcept(c).name })));
+          header.appendChild(chips);
+        }
+        wrap.appendChild(header);
         wrap.appendChild(PQ.ui.prose(unit.content || ''));
         wrap.appendChild(el('div', { class: 'sticky-actions' }, [
           el('button', {
@@ -422,8 +469,10 @@
       const nxt = PQ.content.nextUnit(unit.id);
       shell.innerHTML = '';
       const wrap = el('div', { class: 'wrap' });
+      const doneMark = el('div', { style: 'display:grid;place-items:center;width:48px;height:48px;margin:0 auto var(--s3);border-radius:50%;background:' + (allSolved ? 'var(--ok-soft);color:var(--ok)' : 'var(--surface-2);color:var(--fg-3)') });
+      doneMark.appendChild(PQ.icon(allSolved ? 'check' : 'clock', 24));
       wrap.appendChild(el('div', { class: 'card pad-lg center' }, [
-        el('div', { style: 'font-size:2.6rem', text: allSolved ? '✅' : '🕗' }),
+        doneMark,
         el('h1', { text: allSolved ? 'Lesson complete' : 'Progress saved' }),
         el('p', { class: 'muted', text: allSolved
           ? 'You demonstrated every skill in this lesson. It now counts toward your mastery and will come back in review.'
@@ -464,7 +513,7 @@
 
     function top() {
       PQ.ui.topbar([
-        el('button', { class: 'btn ghost sm', html: '←', onclick: () => PQ.ui.go('#/module/' + mod.id) }),
+        PQ.ui.backButton(() => PQ.ui.go('#/module/' + mod.id), 'Back to module'),
         PQ.ui.crumb([{ label: mod.title, route: '#/module/' + mod.id }, { label: 'Checkpoint' }]),
         el('span', { style: 'flex:1' }),
         idx >= 0 ? el('span', { class: 'pill', text: (idx + 1) + ' / ' + items.length }) : null,
@@ -478,8 +527,8 @@
       const done = PQ.engine.isDone(unit.id);
       shell.appendChild(el('div', { class: 'wrap' }, [
         el('div', { class: 'card pad-lg' }, [
-          el('div', { class: 'row', style: 'gap:12px' }, [
-            el('div', { style: 'font-size:2.2rem', text: '🛡️' }),
+          el('div', { class: 'row', style: 'gap:var(--s3)' }, [
+            cpMark(),
             el('div', [el('h1', { style: 'margin:0', text: unit.title }),
               el('div', { class: 'muted small', text: 'Module checkpoint' })])
           ]),
@@ -538,7 +587,7 @@
       const nxt = PQ.content.nextUnit(unit.id);
       shell.appendChild(el('div', { class: 'wrap' }, [
         el('div', { class: 'card pad-lg center' }, [
-          el('div', { style: 'font-size:3rem', text: passed ? '🛡️' : '💥' }),
+          resultMark(passed),
           el('h1', { text: passed ? 'Checkpoint cleared' : 'Not this time' }),
           el('p', { class: 'muted', text: correct + ' of ' + items.length + ' correct — you needed ' + need + '.' }),
           el('div', { class: 'bar ok mt', style: 'max-width:320px;margin:14px auto' }, [el('i', { style: 'width:' + U.pct(correct, items.length) + '%' })]),
@@ -573,7 +622,7 @@
     host.appendChild(shell);
 
     PQ.ui.topbar([
-      el('button', { class: 'btn ghost sm', html: '←', onclick: () => PQ.ui.go('#/module/' + mod.id) }),
+      PQ.ui.backButton(() => PQ.ui.go('#/module/' + mod.id), 'Back to module'),
       PQ.ui.crumb([{ label: mod.title, route: '#/module/' + mod.id }, { label: p.title }]),
       el('span', { style: 'flex:1' }),
       PQ.ui.statusChip({ compact: true })
@@ -582,12 +631,12 @@
     const wrap = el('div', { class: 'wrap wide' });
     shell.appendChild(wrap);
 
-    wrap.appendChild(el('div', { class: 'row wrap', style: 'gap:8px;margin-bottom:6px' }, [
-      el('span', { class: 'pill py', text: '🏗️ Project' }),
-      el('span', { class: 'pill', text: '+' + (p.xp || 300) + ' XP' }),
-      el('span', { class: 'pill', text: U.plural((p.stages || []).length, 'stage') })
+    wrap.appendChild(PQ.ui.metaRow([
+      { icon: 'project', text: 'Project' },
+      { text: (p.xp || 300) + ' XP' },
+      { text: U.plural((p.stages || []).length, 'stage') }
     ]));
-    wrap.appendChild(el('h1', { text: p.title }));
+    wrap.appendChild(el('h1', { style: 'margin:var(--s2) 0 var(--s4)', text: p.title }));
     wrap.appendChild(PQ.ui.prose(p.brief || ''));
 
     /* stage list */
@@ -613,9 +662,12 @@
       onTest: () => checkStage(stageIdx)
     });
 
-    const runBtn = el('button', { class: 'btn', html: '▸ Run', onclick: () => runIt() });
-    const checkBtn = el('button', { class: 'btn primary', html: '✓ Check current stage', onclick: () => checkStage(stageIdx) });
-    const allBtn = el('button', { class: 'btn ghost', text: '✓✓ Check all stages', onclick: () => checkAll() });
+    const runBtn = el('button', { class: 'btn', onclick: () => runIt() },
+      [PQ.icon('play', 13), el('span', { text: 'Run' })]);
+    const checkBtn = el('button', { class: 'btn primary', onclick: () => checkStage(stageIdx) },
+      [PQ.icon('check', 15), el('span', { text: 'Check stage' })]);
+    const allBtn = el('button', { class: 'btn ghost', onclick: () => checkAll() },
+      [PQ.icon('checkpoint', 15), el('span', { text: 'Check all stages' })]);
     wrap.appendChild(el('div', { class: 'btn-group sticky-actions' }, [runBtn, checkBtn, allBtn]));
     wrap.appendChild(consoleBox);
     wrap.appendChild(testsBox);
@@ -631,7 +683,7 @@
           style: i === stageIdx ? 'border-color:var(--acc)' : '',
           onclick: () => { stageIdx = i; paintStages(); showStage(); }
         }, [
-          el('div', { class: 'lr-ico', text: done ? '✓' : String(i + 1) }),
+          stageMark(done, i),
           el('div', { class: 'lr-body' }, [
             el('div', { class: 'lr-title', text: s.title }),
             el('div', { class: 'lr-sub', text: done ? 'passed' : (i === stageIdx ? 'current stage' : 'not yet checked') })
@@ -655,9 +707,9 @@
     }
 
     async function runIt() {
-      runBtn.disabled = true; runBtn.innerHTML = '<span class="spinner"></span> running';
+      runBtn.disabled = true; setBusy(runBtn, 'Running');
       const r = await PQ.runner.exec({ code: ed.value, stdin: p.stdin || [], files: p.files || null }, 20000);
-      runBtn.disabled = false; runBtn.innerHTML = '▸ Run';
+      runBtn.disabled = false; setLabel(runBtn, 'play', 'Run');
       showConsole(r);
       testsBox.innerHTML = '';
     }
@@ -683,9 +735,9 @@
     async function checkStage(i) {
       const s = (p.stages || [])[i];
       if (!s) return;
-      checkBtn.disabled = true; checkBtn.innerHTML = '<span class="spinner"></span> checking';
+      checkBtn.disabled = true; setBusy(checkBtn, 'Checking');
       const r = await PQ.runner.grade({ code: ed.value, stdin: s.stdin || p.stdin || [], files: p.files || null, tests: s.tests || [] }, 20000);
-      checkBtn.disabled = false; checkBtn.innerHTML = '✓ Check current stage';
+      checkBtn.disabled = false; setLabel(checkBtn, 'check', 'Check stage');
       showConsole(r);
       renderTests(r);
       verdictBox.innerHTML = '';
@@ -699,35 +751,37 @@
         const cur = PQ.engine.state.projects[p.id] || { stages: {} };
         const remaining = (p.stages || []).filter(x => !cur.stages[x.id]);
         verdictBox.appendChild(el('div', { class: 'verdict win' }, [
-          el('h3', { text: '✓ Stage ' + (i + 1) + ' passed' }),
+          el('h3', {}, [PQ.icon('check', 17), el('span', { text: 'Stage ' + (i + 1) + ' passed' })]),
           el('div', { class: 'muted small', text: remaining.length ? U.plural(remaining.length, 'stage') + ' to go.' : 'Every stage passes. Run the full check to ship it.' }),
           remaining.length ? el('button', {
             class: 'btn ok mt', text: 'Go to stage ' + ((p.stages || []).indexOf(remaining[0]) + 1) + ' →',
             onclick: () => { stageIdx = (p.stages || []).indexOf(remaining[0]); paintStages(); showStage(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-          }) : el('button', { class: 'btn ok mt', text: '🚢 Ship the project', onclick: () => checkAll() })
+          }) : el('button', { class: 'btn ok mt', text: 'Ship the project', onclick: () => checkAll() })
         ]));
       } else {
         verdictBox.appendChild(el('div', { class: 'verdict lose' }, [
-          el('h3', { text: '✗ Stage ' + (i + 1) + ' not passing yet' }),
+          el('h3', {}, [PQ.icon('cross', 17), el('span', { text: 'Stage ' + (i + 1) + ' not passing yet' })]),
           el('div', { class: 'muted small', text: 'Only this stage is being checked — earlier stages must keep working too.' })
         ]));
       }
     }
 
     async function checkAll() {
-      allBtn.disabled = true; allBtn.innerHTML = '<span class="spinner"></span> checking all';
+      allBtn.disabled = true; setBusy(allBtn, 'Checking all');
       const all = [];
       for (const s of (p.stages || [])) {
         const r = await PQ.runner.grade({ code: ed.value, stdin: s.stdin || p.stdin || [], files: p.files || null, tests: s.tests || [] }, 20000);
         all.push({ s, r });
       }
-      allBtn.disabled = false; allBtn.innerHTML = '✓✓ Check all stages';
+      allBtn.disabled = false; setLabel(allBtn, 'checkpoint', 'Check all stages');
       testsBox.innerHTML = '';
       let passed = 0;
       all.forEach(({ s, r }, i) => {
         if (r.ok) passed++;
+        const sMark = el('span', { class: 'ti' });
+        sMark.appendChild(PQ.icon(r.ok ? 'check' : 'cross', 13));
         testsBox.appendChild(el('div', { class: 'test ' + (r.ok ? 'pass' : 'fail') }, [
-          el('span', { class: 'ti', text: r.ok ? '✓' : '✗' }),
+          sMark,
           el('div', [el('span', { text: 'Stage ' + (i + 1) + ' — ' + s.title }),
             !r.ok ? el('span', { class: 'tmsg', text: (r.tests || []).filter(t => !t.ok).map(t => t.name).join(', ') || (r.error || '').split('\n').pop() }) : null])
         ]));
@@ -746,7 +800,7 @@
         }
         const nxt = PQ.content.nextUnit(p.id);
         verdictBox.appendChild(el('div', { class: 'verdict win' }, [
-          el('h3', { text: '🚢 Project shipped' }),
+          el('h3', {}, [PQ.icon('trophy', 17), el('span', { text: 'Project shipped' })]),
           el('div', { class: 'prose', html: md(p.outro || 'Every stage passes. You built a working program from a specification — that is what the job actually is.') }),
           nxt ? el('button', { class: 'btn primary lg mt', text: 'Next: ' + nxt.title + ' →', onclick: () => PQ.ui.go('#/unit/' + nxt.id) }) : null
         ]));
@@ -761,8 +815,10 @@
     function renderTests(r) {
       testsBox.innerHTML = '';
       (r.tests || []).forEach(t => {
+        const tMark = el('span', { class: 'ti' });
+        tMark.appendChild(PQ.icon(t.ok ? 'check' : 'cross', 13));
         testsBox.appendChild(el('div', { class: 'test ' + (t.ok ? 'pass' : 'fail') }, [
-          el('span', { class: 'ti', text: t.ok ? '✓' : '✗' }),
+          tMark,
           el('div', { style: 'flex:1;min-width:0' }, [el('span', { text: t.name }), !t.ok && t.msg ? el('span', { class: 'tmsg', text: t.msg }) : null])
         ]));
       });

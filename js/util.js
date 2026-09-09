@@ -9,6 +9,9 @@ window.PQ = window.PQ || {};
 
   function el(tag, attrs, children) {
     const n = document.createElement(tag);
+    // Allow el(tag, [children]) — otherwise the array is walked as attributes
+    // and the children are silently dropped.
+    if (Array.isArray(attrs)) { children = attrs; attrs = null; }
     if (attrs) for (const k in attrs) {
       const v = attrs[k];
       if (v === null || v === undefined || v === false) continue;

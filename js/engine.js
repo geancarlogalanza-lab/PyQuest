@@ -15,9 +15,9 @@
   const MAX_LEVEL = 60;
 
   const RANKS = [
-    [1, 'Novice', '🌱'], [5, 'Apprentice', '📗'], [10, 'Coder', '⌨️'],
-    [17, 'Developer', '🛠️'], [25, 'Engineer', '⚙️'], [34, 'Architect', '📐'],
-    [43, 'Pythonista', '🐍'], [53, 'Grandmaster', '👑']
+    [1, 'Novice'], [5, 'Apprentice'], [10, 'Coder'],
+    [17, 'Developer'], [25, 'Engineer'], [34, 'Architect'],
+    [43, 'Pythonista'], [53, 'Grandmaster']
   ];
 
   /* ==================================================================== */
@@ -368,14 +368,14 @@
   /* ==================================================================== */
 
   const QUEST_POOL = [
-    { id: 'solve3', icon: '⚡', name: 'Solve 3 exercises', goal: 3, xp: 40, m: d => d.solved },
-    { id: 'solve6', icon: '💥', name: 'Solve 6 exercises', goal: 6, xp: 70, m: d => d.solved },
-    { id: 'xp120', icon: '💎', name: 'Earn 120 XP', goal: 120, xp: 45, m: d => d.xp },
-    { id: 'xp250', icon: '💠', name: 'Earn 250 XP', goal: 250, xp: 80, m: d => d.xp },
-    { id: 'ft2', icon: '🎯', name: '2 first-try solves', goal: 2, xp: 55, m: d => d.firstTry },
-    { id: 'debug1', icon: '🐛', name: 'Squash a bug', goal: 1, xp: 50, m: d => d.debug },
-    { id: 'lesson1', icon: '📖', name: 'Finish a lesson', goal: 1, xp: 45, m: d => d.lessons },
-    { id: 'review1', icon: '🔁', name: 'Do a review session', goal: 1, xp: 50, m: d => d.reviews }
+    { id: 'solve3', icon: 'check', name: 'Solve 3 exercises', goal: 3, xp: 40, m: d => d.solved },
+    { id: 'solve6', icon: 'check', name: 'Solve 6 exercises', goal: 6, xp: 70, m: d => d.solved },
+    { id: 'xp120', icon: 'xp', name: 'Earn 120 XP', goal: 120, xp: 45, m: d => d.xp },
+    { id: 'xp250', icon: 'xp', name: 'Earn 250 XP', goal: 250, xp: 80, m: d => d.xp },
+    { id: 'ft2', icon: 'target', name: '2 first-try solves', goal: 2, xp: 55, m: d => d.firstTry },
+    { id: 'debug1', icon: 'debug', name: 'Squash a bug', goal: 1, xp: 50, m: d => d.debug },
+    { id: 'lesson1', icon: 'lesson', name: 'Finish a lesson', goal: 1, xp: 45, m: d => d.lessons },
+    { id: 'review1', icon: 'review', name: 'Do a review session', goal: 1, xp: 50, m: d => d.reviews }
   ];
 
   function questsFor(day) {
@@ -628,7 +628,7 @@
   function rank() {
     let r = RANKS[0];
     for (const x of RANKS) if (S.state.level >= x[0]) r = x;
-    return { name: r[1], icon: r[2] };
+    return { name: r[1] };
   }
   function journeyProgress() {
     const units = C().allUnits();

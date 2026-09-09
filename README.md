@@ -27,7 +27,7 @@ Click the install icon in the address bar, or use **Settings → Install as an a
 Once installed, open Settings → Offline → **Download Python for offline use** while you still have a
 connection. After that it runs with the network off — on a plane, on the underground, anywhere.
 
-> Want a real  for sideloading or the Play Store? Point
+> Want a real `.apk` for sideloading or the Play Store? Point
 > [PWABuilder](https://www.pwabuilder.com/) at the URL above — the manifest and service worker are
 > already set up for it, so it will package a signed Android app without any code changes.
 
@@ -80,11 +80,11 @@ Roughly 80% of the exercises require you to write and run Python.
 one unaided raises that concept's mastery; needing hints raises it less; failing lowers it. Mastery
 **decays with time**, so the skill map stays honest about what has faded.
 
-- **Review** (`🔁`) builds retrieval sessions from your weakest and most-overdue concepts using
+- **Review** builds retrieval sessions from your weakest and most-overdue concepts using
   SM-2 style spaced repetition.
 - **Checkpoints** end every module: no hints, no solutions, 80% to pass. Fail and you are told
   exactly which ideas to revisit.
-- **Skill map** (`🧠`) shows all 239 tracked concepts coloured by live strength.
+- **Skill map** shows all 239 tracked concepts coloured by live strength.
 - **XP** comes only from evidence. Re-solving something gives a small practice trickle, so review is
   worth doing but cannot be farmed. Levels run 1–60, and finishing the journey lands you at about 60.
 - **Streaks, quests and 45 achievements** exist to get you to open it tomorrow. They cannot buy you
@@ -147,8 +147,7 @@ The same app, adapted rather than shrunk.
 with `: ( ) [ ] { } " ' = == _ . , + - * % # < > f" {}` plus indent, dedent, undo and redo — because
 typing a colon on a phone keyboard is otherwise three taps.
 
-Install it as an app from your browser's *Install* / *Add to Home Screen* menu for a full-screen
-icon on either device.
+It installs as a real app on both — see [Install it on your phone](#install-it-on-your-phone).
 
 ---
 
@@ -180,10 +179,12 @@ serve.js                   static server, prints the LAN address for your phone
 sw.js                      service worker: offline caching
 DESIGN.md                  why it is built this way
 sql/schema.sql             optional Supabase table + RLS policies
+tools/make-icons.js        regenerates the app icons (node tools/make-icons.js)
 
 css/app.css                design system (dark + light, responsive)
 js/
   util.js                  DOM helpers, markdown renderer, dates
+  icons.js                 the stroke icon set
   store.js                 IndexedDB with a localStorage fallback
   content.js               curriculum registry and navigation
   engine.js                event log → derived state; XP, mastery, quests, achievements
